@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>迪士尼角色搜索</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>迪士尼角色</h1>
+
+        <div class="search-section">
+            <input type="text" id="idInput" placeholder="透過ID搜尋">
+            <button onclick="searchById()">搜尋</button>
+        </div>
+
+        <div class="search-section">
+            <input type="text" id="filmInput" placeholder="透過電影搜尋">
+            <button onclick="searchByFilm()">搜尋</button>
+        </div>
+
+        <div id="result"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #54bdf1;
+        margin: 0;
+        padding: 20px;
+    }
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: #1887d1;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+        text-align: center;
+        color: #333;
+    }
+    .search-section {
+        margin: 20px 0;
+        text-align: center;
+    }
+    input {
+        padding: 10px;
+        width: 80%;
+        margin-right: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    button {
+        padding: 10px 20px;
+        border: none;
+        background-color: #ffca37;
+        color: #fff;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #000000;
+    }
+    #result {
+        margin-top: 20px;
+    }
+    .character-card {
+        background-color: #eef997;
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    .character-card img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const resultDiv = document.getElementById('result');
+
+        function fetchAndRender(url, renderFunction) {
+            fetch(url)
+                .then(response => response.json())
+                .then(data => renderFunction(data))
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
+        function renderById(data) {
+            if (data.data) {
+                const character = data.data;
+                resultDiv.innerHTML = `
+                    <div class="character-card">
+                        <h2>${character.name}</h2>
+                        <img src="${character.imageUrl}" alt="${character.name}">
+                        <p>電影: ${character.films.join(', ')}</p>
+                        <p>短片: ${character.shortFilms.join(', ')}</p>
+                        <p>電視節目: ${character.tvShows.join(', ')}</p>
+                        <p>電子遊戲: ${character.videoGames.join(', ')}</p>
+                        <p>樂園設施: ${character.parkAttractions.join(', ')}</p>
+                        <p>盟友: ${character.allies.join(', ')}</p>
+                        <p>敵人: ${character.enemies.join(', ')}</p>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = '<p>未找到該ID的角色。</p>';
+            }
+        }
+
+        function renderByFilm(data) {
+            if (data.data && data.data.length > 0) {
+                const characters = data.data;
+                resultDiv.innerHTML = characters.map(character => `
+                    <div class="character-card">
+                        <h2>${character.name}</h2>
+                        <img src="${character.imageUrl}" alt="${character.name}">
+                        <p>電影: ${character.films.join(', ')}</p>
+                        <p>短片: ${character.shortFilms.join(', ')}</p>
+                        <p>電視節目: ${character.tvShows.join(', ')}</p>
+                        <p>電子遊戲: ${character.videoGames.join(', ')}</p>
+                        <p>樂園設施: ${character.parkAttractions.join(', ')}</p>
+                        <p>盟友: ${character.allies.join(', ')}</p>
+                        <p>敵人: ${character.enemies.join(', ')}</p>
+                    </div>
+                `).join('');
+            } else {
+                resultDiv.innerHTML = '<p>未找到該電影的角色。</p>';
+            }
+        }
+
+        window.searchById = function() {
+            const id = document.getElementById('idInput').value;
+            const url = `https://api.disneyapi.dev/character/${id}`;
+            fetchAndRender(url, renderById);
+        };
+
+        window.searchByFilm = function() {
+            const film = document.getElementById('filmInput').value;
+            const url = `https://api.disneyapi.dev/character?films=${encodeURIComponent(film)}`;
+            fetchAndRender(url, renderByFilm);
+        };
+    });
+</script>
+</html>
